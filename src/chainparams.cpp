@@ -16,6 +16,7 @@
 #include <boost/assign/list_of.hpp>
 
 #include "chainparamsseeds.h"
+#include "arith_uint256.h"
 
 static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesisOutputScript, uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion, const CAmount& genesisReward)
 {
@@ -220,7 +221,7 @@ public:
 static CMainParams mainParams;
 
 /**
- * Testnet (v3)
+ * Testnet (60x)
  */
 class CTestNetParams : public CChainParams {
 public:
@@ -235,7 +236,7 @@ public:
         // 23.15 * 20% = 4.630
         // 23.15 * 30% = 6.945
         // 23.15 * 40% = 9.260
-        consensus.nBlockSubsidy = 2315000000;
+        consensus.nBlockSubsidy = 2315000000 * 60;
         // 10% founders reward
         consensus.nBlockSubsidyFounders = consensus.nBlockSubsidy * 10 / 100;
         // 20% miners
@@ -250,15 +251,17 @@ public:
 
 
         /*does not matter for ENERGI.. payment is consistent forever*/
-        consensus.nMasternodePaymentsStartBlock = 87600; // should be about 2 months after genesis
-        consensus.nMasternodePaymentsIncreaseBlock =  46000;
-        consensus.nMasternodePaymentsIncreasePeriod = 576;
-        consensus.nInstantSendKeepLock = 6;
-        consensus.nBudgetPaymentsStartBlock = 60000;
+        consensus.nMasternodePaymentsStartBlock = 1460; // 87600/60 
+        // TODO: Need to remove these two after testing
+        consensus.nMasternodePaymentsIncreaseBlock =  0; // min value to make sure they aren't being used
+        consensus.nMasternodePaymentsIncreasePeriod = 0; //min value to make sure they aren't being used
+       
+       consensus.nInstantSendKeepLock = 6;
+        consensus.nBudgetPaymentsStartBlock = 1000; //60000/60
         consensus.nBudgetPaymentsCycleBlocks = 50;
         consensus.nBudgetPaymentsWindowBlocks = 10;
         consensus.nBudgetProposalEstablishingTime = 60*20;
-        consensus.nSuperblockStartBlock = 61000; // NOTE: Should satisfy nSuperblockStartBlock > nBudgetPeymentsStartBlock
+        consensus.nSuperblockStartBlock = 1016; // NOTE: Should satisfy nSuperblockStartBlock > nBudgetPaymentsStartBlock
         consensus.nSuperblockCycle = 24;
         consensus.nGovernanceMinQuorum = 1;
         consensus.nGovernanceFilterElements = 500;
@@ -285,16 +288,34 @@ public:
         pchMessageStart[0] = 0xd9;
         pchMessageStart[1] = 0x2a;
         pchMessageStart[2] = 0xab;
-        pchMessageStart[3] = 0x6e;
+        pchMessageStart[3] = 0x60; // Changed the last byte just in case, even though the port is different too, so shouldn't mess with the general testnet
         vAlertPubKey = ParseHex("04c3660259aa76854c135c5b5b0a668cecc7ca81b531dbbb212353c90132ba32cf1a11309eec989856bbf1748d047b69590279633f15e5e9835d263acdedad2400");
-        nDefaultPort = 19797;
+        nDefaultPort = 29797; // Changed the port so it doesn't mess with the regular testnet
         nMaxTipAge = 0x7fffffff; // allow mining on top of old blocks for testnet
         nPruneAfterHeight = 1000;
 
 
-        genesis = CreateGenesisBlock(1506586761UL, 0, 0x207fffff, 1, 50 * COIN);
+        genesis = CreateGenesisBlock(1507385646UL, 606060, 0x207fffff, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0x440cbbe939adba25e9e41b976d3daf8fb46b5f6ac0967b0a9ed06a749e7cf1e2"));
+
+        // #if 0
+        // Mine a genesis block
+		// auto hashGenesisBlock = uint256S("0x01");
+		// if (true) {
+  //           using namespace std;
+  //           cout <<"Recalculating params for testnet." << endl
+  //           << "Prev genesis nonce: " <<  std::to_string(genesis.nNonce) << endl
+  //           << "Prev genesis hash: "<< consensus.hashGenesisBlock.ToString().c_str()<<endl;
+  //           // loop finds genesis nonce
+  //           // for(genesis.nNonce = 0; UintToArith256(genesis.GetHash()).GetCompact() < genesis.nBits; genesis.nNonce++){cout << genesis.GetHash().ToString().c_str() << endl;} 
+  //           for(genesis.nNonce = 606060;  consensus.powLimit < genesis.GetHash() ; genesis.nNonce++){cout << genesis.GetHash().ToString().c_str() << endl;} 
+  //           cout << "New genesis merkle root: " << genesis.hashMerkleRoot.ToString().c_str() << endl
+  //           <<"New genesis nonce: " << std::to_string(genesis.nNonce) << endl
+  //           <<"New genesis hash: " << genesis.GetHash().ToString().c_str() << endl;
+  //           exit(0);
+  //       }
+        // #endif
+        assert(consensus.hashGenesisBlock == uint256S("0x4bf5710bde13dc3dbb1d851aed3364a6c417bc6f23365d17ae95f3a4eb2ce092"));
         assert(genesis.hashMerkleRoot == uint256S("0x6a4855e61ae0da5001564cee6ba8dcd7bc361e9bb12e76b62993390d6db25bca"));
 
         // BIP34 is always active in Energi
@@ -334,7 +355,7 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-            ( 0, uint256S("0x440cbbe939adba25e9e41b976d3daf8fb46b5f6ac0967b0a9ed06a749e7cf1e2")),
+            ( 0, uint256S("0x4bf5710bde13dc3dbb1d851aed3364a6c417bc6f23365d17ae95f3a4eb2ce092")),
 			0, // * UNIX timestamp of last checkpoint block
             0,     // * total number of transactions between genesis and last checkpoint
                         //   (the tx=... number in the SetBestChain debug.log lines)

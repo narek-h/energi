@@ -79,7 +79,7 @@ namespace egihash
 		*
 		*	The DAG and cache must be regenerated once per epoch.
 		*/
-		static constexpr uint32_t EPOCH_LENGTH = 30000u;
+		static constexpr uint32_t EPOCH_LENGTH = 5000u; //smaller epoch for testnet 60x
 
 		/** \brief The width of the mix hash for egihash.
 		*/
